@@ -1,14 +1,14 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createNote } from "../../services/noteService";
 import type { NoteTag } from "../../types/note";
 import css from "./NoteForm.module.css";
 
 interface NoteFormProps {
-  onSubmit: (data: { title: string; content: string; tag: NoteTag }) => void;
   onCancel: () => void;
 }
 
-// ✅ Allow empty tag during editing
 interface FormValues {
   title: string;
   content: string;
@@ -32,22 +32,30 @@ const validationSchema = Yup.object().shape({
     .required("Tag is required"),
 });
 
-export const NoteForm = ({ onSubmit, onCancel }: NoteFormProps) => {
+export const NoteForm = ({ onCancel }: NoteFormProps) => {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: createNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+  });
+
   return (
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
       onSubmit={(values, actions) => {
-        // ✅ Type assertion is safe here due to Yup validation
-        const newNote = {
+        mutation.mutate({
           title: values.title,
           content: values.content,
           tag: values.tag as NoteTag,
-        };
+        });
 
-        onSubmit(newNote);
         actions.setSubmitting(false);
         actions.resetForm();
+        onCancel();
       }}
     >
       {({ isSubmitting }) => (

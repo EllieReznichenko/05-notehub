@@ -1,11 +1,6 @@
 import { useState } from "react";
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  keepPreviousData,
-} from "@tanstack/react-query";
-import { fetchNotes, createNote } from "../../services/noteService";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { fetchNotes } from "../../services/noteService";
 import { useDebouncedCallback } from "use-debounce";
 import NoteList from "../NoteList/NoteList";
 import { Pagination } from "../Pagination/Pagination";
@@ -21,8 +16,6 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const queryClient = useQueryClient();
 
   const handleSearch = useDebouncedCallback((value: string) => {
     setDebouncedSearch(value);
@@ -40,14 +33,6 @@ export default function App() {
     placeholderData: keepPreviousData,
   });
 
-  const createNoteMutation = useMutation({
-    mutationFn: createNote,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-      setIsModalOpen(false);
-    },
-  });
-
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
@@ -56,7 +41,11 @@ export default function App() {
           <Pagination
             currentPage={page}
             total_pages={data.total_pages}
-            onPageChange={setPage}
+            onPageChange={(selected) => {
+              const nextPage = selected + 1;
+              if (nextPage < 1) return;
+              setPage(nextPage);
+            }}
           />
         )}
         <button className={css.button} onClick={() => setIsModalOpen(true)}>
@@ -75,10 +64,7 @@ export default function App() {
 
       {isModalOpen && (
         <Modal onClose={() => setIsModalOpen(false)}>
-          <NoteForm
-            onSubmit={(note) => createNoteMutation.mutate(note)}
-            onCancel={() => setIsModalOpen(false)}
-          />
+          <NoteForm onCancel={() => setIsModalOpen(false)} />
         </Modal>
       )}
     </div>
