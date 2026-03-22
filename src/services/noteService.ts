@@ -14,8 +14,8 @@ export interface FetchNotesParams {
 }
 
 interface RawFetchNotesResponse {
-  data: Note[];
-  total_pages: number;
+  notes: Note[];
+  totalPages: number;
 }
 
 export interface FetchNotesResponse {
@@ -39,8 +39,8 @@ export const fetchNotes = async ({
   });
 
   return {
-    notes: data.data,
-    totalPages: data.total_pages,
+    notes: data.notes,
+    totalPages: data.totalPages,
   };
 };
 
