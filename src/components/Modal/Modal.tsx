@@ -7,17 +7,31 @@ interface ModalProps {
   onClose: () => void;
 }
 
-export const Modal = ({ children, onClose }: ModalProps) => {
+export default function Modal({ children, onClose }: ModalProps) {
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
     };
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
   }, [onClose]);
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) onClose();
+  const handleBackdropClick = (
+    event: React.MouseEvent<HTMLDivElement>
+  ): void => {
+    if (event.target === event.currentTarget) {
+      onClose();
+    }
   };
 
   return ReactDOM.createPortal(
@@ -31,4 +45,4 @@ export const Modal = ({ children, onClose }: ModalProps) => {
     </div>,
     document.body
   );
-};
+}

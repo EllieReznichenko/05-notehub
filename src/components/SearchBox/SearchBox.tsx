@@ -6,9 +6,9 @@ interface SearchBoxProps {
   onChange: (value: string) => void;
 }
 
-export const SearchBox = ({ value, onChange }: SearchBoxProps) => {
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
+export default function SearchBox({ value, onChange }: SearchBoxProps) {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
+    onChange(event.target.value);
   };
 
   return (
@@ -20,4 +20,4 @@ export const SearchBox = ({ value, onChange }: SearchBoxProps) => {
       onChange={handleChange}
     />
   );
-};
+}
